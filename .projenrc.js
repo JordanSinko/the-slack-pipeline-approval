@@ -29,7 +29,7 @@ const project = new AwsCdkConstructLibrary({
     "pretty-quick": "^3.0.2",
     "npm-run-all": "^4.1.5",
   },
-  cdkDependencies: ["@aws-cdk/core", "@aws-cdk/aws-kinesis"],
+  cdkDependencies: ["@aws-cdk/core"],
   cdkTestDependencies: ["@aws-cdk/assert"],
   eslint: false,
   releaseWorkflow: true,
