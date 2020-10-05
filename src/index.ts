@@ -1,8 +1,8 @@
 import { resolve } from "path";
 import { Stack, Construct } from "@aws-cdk/core";
-import { IStage, ActionBindOptions, ActionConfig } from "@aws-cdk/aws-codepipeline";
+import { IStage, ActionBindOptions, ActionConfig, IAction } from "@aws-cdk/aws-codepipeline";
 import { ManualApprovalAction, ManualApprovalActionProps } from "@aws-cdk/aws-codepipeline-actions";
-import { Topic } from "@aws-cdk/aws-sns";
+import { ITopic, Topic } from "@aws-cdk/aws-sns";
 import { Code, Function as AwsFunction, Runtime } from "@aws-cdk/aws-lambda";
 import { HttpApi, HttpMethod, LambdaProxyIntegration } from "@aws-cdk/aws-apigatewayv2";
 import { LambdaSubscription } from "@aws-cdk/aws-sns-subscriptions";
@@ -14,13 +14,17 @@ export interface SlackApprovalActionProps extends ManualApprovalActionProps {
   readonly slackIcon?: string;
 }
 
-export class SlackApprovalAction extends ManualApprovalAction {
-  slackProps: SlackApprovalActionProps;
-  approval: SlackApproval;
-  id: string;
-  slackAdditionalInformation?: string;
+interface SlackApprovalActionContext {
+  readonly topic: ITopic;
+  readonly approverHandler: AwsFunction;
+}
 
-  constructor(approval: SlackApproval, id: string, props: SlackApprovalActionProps) {
+class SlackApprovalAction extends ManualApprovalAction {
+  private readonly context: SlackApprovalActionContext;
+  private readonly slackProps: SlackApprovalActionProps;
+  private readonly slackAdditionalInformation?: string;
+
+  constructor(props: SlackApprovalActionProps, context: SlackApprovalActionContext) {
     const { slackChannel, slackUsername, slackIcon, additionalInformation: _additionalInformation, ..._props } = props;
     const additionalInformation = JSON.stringify({
       slackChannel,
@@ -35,14 +39,13 @@ export class SlackApprovalAction extends ManualApprovalAction {
     });
 
     this.slackProps = props;
-    this.id = id;
-    this.approval = approval;
+    this.context = context;
     this.slackAdditionalInformation = additionalInformation;
   }
 
   protected bound(_scope: Construct, stage: IStage, options: ActionBindOptions): ActionConfig {
-    this.approval.topic.grantPublish(options.role);
-    this.approval.approverHandler.role?.addToPrincipalPolicy(
+    this.context.topic.grantPublish(options.role);
+    this.context.approverHandler.role?.addToPrincipalPolicy(
       new PolicyStatement({
         actions: ["codepipeline:PutApprovalResult"],
         resources: [`${stage.pipeline.pipelineArn}/${stage.stageName}/${this.slackProps.actionName}`],
@@ -51,7 +54,7 @@ export class SlackApprovalAction extends ManualApprovalAction {
 
     return {
       configuration: undefinedIfAllValuesAreEmpty({
-        NotificationArn: this.approval.topic.topicArn,
+        NotificationArn: this.context.topic.topicArn,
         CustomData: this.slackAdditionalInformation,
         ExternalEntityLink: this.slackProps.externalEntityLink,
       }),
@@ -64,9 +67,9 @@ export interface SlackApprovalProps {
 }
 
 export class SlackApproval extends Construct {
-  public readonly props: SlackApprovalProps;
-  public readonly topic: Topic;
-  public readonly approverHandler: AwsFunction;
+  readonly props: SlackApprovalProps;
+  readonly topic: Topic;
+  readonly approverHandler: AwsFunction;
 
   constructor(scope: Construct, id: string, props: SlackApprovalProps) {
     super(scope, id);
@@ -113,8 +116,8 @@ export class SlackApproval extends Construct {
     });
   }
 
-  public addApprovalAction(id: string, props: SlackApprovalActionProps) {
-    const action = new SlackApprovalAction(this, id, { ...props });
+  public addApprovalAction(props: SlackApprovalActionProps): IAction {
+    const action = new SlackApprovalAction({ ...props }, { topic: this.topic, approverHandler: this.approverHandler });
     return action;
   }
 }

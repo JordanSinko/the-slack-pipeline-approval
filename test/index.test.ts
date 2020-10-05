@@ -29,7 +29,7 @@ test("should include approval action, requester function and approver function",
       },
       {
         stageName: "Approval",
-        actions: [approval.addApprovalAction("Approval", { actionName: "Approval", slackChannel: "1" })],
+        actions: [approval.addApprovalAction({ actionName: "Approval", slackChannel: "1" })],
       },
     ],
   });
