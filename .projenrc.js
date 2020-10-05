@@ -12,7 +12,7 @@ class ContentFile extends FileBase {
 }
 
 const project = new AwsCdkConstructLibrary({
-  cdkVersion: "1.63.0",
+  cdkVersion: "1.66.0",
   name: "@JordanSinko/the-slack-pipeline-approval",
   authorName: "Jordan Sinko",
   authorAddress: "jordan5sinko@gmail.com",
@@ -20,7 +20,9 @@ const project = new AwsCdkConstructLibrary({
   scripts: {
     format: "pretty-quick --staged",
     "compile:construct": "jsii --silence-warnings=reserved-word --no-fix-peer-dependencies && jsii-docgen",
-    "compile:handler": "esbuild src/handler/index.ts --outfile=lib/handler/index.js --platform=node --format=cjs",
+    "compile:handlers": "npm run compile:requester && npm run compile:approver",
+    "compile:requester": "esbuild src/requester/index.ts --outfile=lib/requester/index.js --platform=node --format=cjs",
+    "compile:approver": "esbuild src/approver/index.ts --outfile=lib/approver/index.js --platform=node --format=cjs",
   },
   devDependencies: {
     esbuild: "^0.7.9",
@@ -29,7 +31,16 @@ const project = new AwsCdkConstructLibrary({
     "pretty-quick": "^3.0.2",
     "npm-run-all": "^4.1.5",
   },
-  cdkDependencies: ["@aws-cdk/core"],
+  cdkDependencies: [
+    "@aws-cdk/core",
+    "@aws-cdk/aws-codepipeline",
+    "@aws-cdk/aws-codepipeline-actions",
+    "@aws-cdk/aws-sns",
+    "@aws-cdk/aws-sns-subscriptions",
+    "@aws-cdk/aws-iam",
+    "@aws-cdk/aws-lambda",
+    "@aws-cdk/aws-apigatewayv2",
+  ],
   cdkTestDependencies: ["@aws-cdk/assert"],
   eslint: false,
   releaseWorkflow: true,
@@ -38,12 +49,12 @@ const project = new AwsCdkConstructLibrary({
   npmRegistry: "npm.pkg.github.com",
 });
 
-project.addScript("compile", "npm run compile:construct && npm run compile:handler");
+project.addScript("compile", "npm run compile:construct && npm run compile:handlers");
 
 project.addFields({
   jsii: {
     ...project.manifest.jsii,
-    excludeTypescript: ["src/handler"],
+    excludeTypescript: ["src/approver", "src/requester"],
   },
 });
 

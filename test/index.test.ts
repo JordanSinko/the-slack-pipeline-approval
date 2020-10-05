@@ -1,13 +1,14 @@
 import "@aws-cdk/assert/jest";
 import { App, Stack } from "@aws-cdk/core";
 
-import { SlackPipelineApproval } from "../src";
+import { SlackApproval } from "../src";
 
 test("Snapshot", () => {
   const app = new App();
   const stack = new Stack(app, "testing-stack");
 
-  new SlackPipelineApproval(stack, "Approval");
+  const approval = new SlackApproval(stack, "Approval", { slackToken: "xoxb-12345" });
+  approval.addApprovalAction("Approval", { actionName: "Approval", slackChannel: "1" });
 
   expect(app.synth().getStackArtifact(stack.artifactId).template).toMatchSnapshot();
 });
