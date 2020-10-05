@@ -13,6 +13,7 @@
     "bump": "yarn --silent no-changes || standard-version",
     "release": "yarn --silent no-changes || (yarn bump && git push --follow-tags origin master)",
     "projen:upgrade": "yarn upgrade -L projen && CI=\"\" yarn projen",
+    "clean": "rimraf coverage dist lib node_modules",
     "format": "pretty-quick --staged",
     "compile:construct": "jsii --silence-warnings=reserved-word --no-fix-peer-dependencies && jsii-docgen",
     "compile:handlers": "npm run compile:requester && npm run compile:approver",

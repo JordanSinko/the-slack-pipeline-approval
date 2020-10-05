@@ -18,6 +18,7 @@ const project = new AwsCdkConstructLibrary({
   authorAddress: "jordan5sinko@gmail.com",
   repository: "https://github.com/JordanSinko/the-slack-pipeline-approval",
   scripts: {
+    clean: "rimraf coverage dist lib node_modules",
     format: "pretty-quick --staged",
     "compile:construct": "jsii --silence-warnings=reserved-word --no-fix-peer-dependencies && jsii-docgen",
     "compile:handlers": "npm run compile:requester && npm run compile:approver",
