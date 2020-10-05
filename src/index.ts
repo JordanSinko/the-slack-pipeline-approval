@@ -83,6 +83,7 @@ export class SlackApproval extends Construct {
       code: Code.fromAsset(resolve(__dirname, "requester"), {}),
       handler: "index.handler",
       environment: {
+        HANDLER_TYPE: "Requester",
         AWS_ACCOUNT_ID: stack.account,
         SLACK_TOKEN: this.props.slackToken,
       },
@@ -97,6 +98,7 @@ export class SlackApproval extends Construct {
       code: Code.fromAsset(resolve(__dirname, "approver"), {}),
       handler: "index.handler",
       environment: {
+        HANDLER_TYPE: "Approver",
         AWS_ACCOUNT_ID: stack.account,
         SLACK_TOKEN: this.props.slackToken,
       },

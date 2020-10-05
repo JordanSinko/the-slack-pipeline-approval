@@ -1,17 +1,18 @@
 import "@aws-cdk/assert/jest";
-import { App, SecretValue, Stack } from "@aws-cdk/core";
+import { SecretValue, Stack } from "@aws-cdk/core";
 import { Artifact, Pipeline } from "@aws-cdk/aws-codepipeline";
 import { GitHubSourceAction } from "@aws-cdk/aws-codepipeline-actions";
 
 import { SlackApproval } from "../src";
 
-test("Snapshot", () => {
-  const app = new App();
-  const stack = new Stack(app, "testing-stack");
+test("should include approval action, requester function and approver function", () => {
+  const stack = new Stack();
 
+  // GIVEN
   const sourceArtifact = new Artifact();
-
   const approval = new SlackApproval(stack, "Approval", { slackToken: "xoxb-12345" });
+
+  // WHEN
   new Pipeline(stack, "Pipeline", {
     stages: [
       {
@@ -33,5 +34,25 @@ test("Snapshot", () => {
     ],
   });
 
-  expect(app.synth().getStackArtifact(stack.artifactId).template).toMatchSnapshot();
+  // THEN
+  expect(stack).toHaveResourceLike("AWS::CodePipeline::Pipeline", {
+    Stages: [
+      { Actions: [{ Name: "GitHub" }], Name: "Source" },
+      { Actions: [{ Configuration: { CustomData: '{"slackChannel":"1"}' }, Name: "Approval" }], Name: "Approval" },
+    ],
+  });
+
+  expect(stack).toHaveResourceLike("AWS::Lambda::Function", {
+    Runtime: "nodejs12.x",
+    Environment: {
+      Variables: { HANDLER_TYPE: "Approver", AWS_ACCOUNT_ID: { Ref: "AWS::AccountId" }, SLACK_TOKEN: "xoxb-12345" },
+    },
+  });
+
+  expect(stack).toHaveResourceLike("AWS::Lambda::Function", {
+    Runtime: "nodejs12.x",
+    Environment: {
+      Variables: { HANDLER_TYPE: "Requester", AWS_ACCOUNT_ID: { Ref: "AWS::AccountId" }, SLACK_TOKEN: "xoxb-12345" },
+    },
+  });
 });
