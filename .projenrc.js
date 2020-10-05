@@ -31,6 +31,11 @@ const project = new AwsCdkConstructLibrary({
     prettier: "^2.1.2",
     "pretty-quick": "^3.0.2",
     "npm-run-all": "^4.1.5",
+
+    // Dependencies for handlers which are bundled with esbuild
+    "@types/aws-lambda": "^8.10.63",
+    "aws-sdk": "^2.766.0",
+    phin: "^3.5.0",
   },
   cdkDependencies: [
     "@aws-cdk/core",

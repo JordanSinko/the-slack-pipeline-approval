@@ -1,5 +1,4 @@
 import { resolve } from "path";
-
 import { Stack, Construct } from "@aws-cdk/core";
 import { IStage, ActionBindOptions, ActionConfig } from "@aws-cdk/aws-codepipeline";
 import { ManualApprovalAction, ManualApprovalActionProps } from "@aws-cdk/aws-codepipeline-actions";
