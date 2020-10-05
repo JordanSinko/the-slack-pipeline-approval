@@ -23,9 +23,9 @@ const project = new AwsCdkConstructLibrary({
     "compile:construct": "jsii --silence-warnings=reserved-word --no-fix-peer-dependencies && jsii-docgen",
     "compile:handlers": "npm run compile:requester && npm run compile:approver",
     "compile:requester":
-      "esbuild src/requester/index.ts --outfile=lib/requester/index.js --platform=node --target=es2019 --format=cjs",
+      "esbuild src/requester/index.ts --outfile=lib/requester/index.js --platform=node --target=es2019 --format=cjs --bundle",
     "compile:approver":
-      "esbuild src/approver/index.ts --outfile=lib/approver/index.js --platform=node --target=es2019 --format=cjs",
+      "esbuild src/approver/index.ts --outfile=lib/approver/index.js --platform=node --target=es2019 --format=cjs --bundle",
   },
   devDependencies: {
     esbuild: "^0.7.9",
