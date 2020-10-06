@@ -1,4 +1,4 @@
-const { AwsCdkConstructLibrary, FileBase } = require("projen");
+const { AwsCdkConstructLibrary, FileBase, NodePackageManager } = require("projen");
 
 class ContentFile extends FileBase {
   constructor(project, path, options) {
@@ -12,6 +12,7 @@ class ContentFile extends FileBase {
 }
 
 const project = new AwsCdkConstructLibrary({
+  packageManager: NodePackageManager.NPM,
   cdkVersion: "1.66.0",
   name: "@JordanSinko/the-slack-pipeline-approval",
   authorName: "Jordan Sinko",
@@ -69,6 +70,7 @@ project.addFields({
 new ContentFile(project, ".prettierignore", {
   content: `package.json
 API.md
+.versionrc.json
 `,
 });
 
